@@ -15,7 +15,7 @@ def mkdir(file):
 if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     path = './dataset/flower_photos/'
-    flower_class = [cla for cla in os.listdir(path)]
+    flower_class = [cla for cla in os.listdir(path) if '.txt' not in cla]
     for cla in flower_class:
         mkdir('./dataset/train/' + cla)
     for cla in flower_class:
