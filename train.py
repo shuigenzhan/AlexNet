@@ -71,7 +71,7 @@ if __name__ == '__main__':
             prediction = torch.max(y_hat, dim=1)[1]
             accuracy += (prediction == labels).sum().item()
         accuracy /= val_num
-        print(f'Epoch: [{epoch} / {epochs}], accuracy: [{accuracy:.4f}]')
+        print(f'Epoch: [{epoch + 1} / {epochs}], accuracy: [{accuracy:.4f}]')
         if accuracy > best_acc:
             best_acc = accuracy
             torch.save(network.state_dict(), './output/{}_{}'.format(epoch, accuracy))
