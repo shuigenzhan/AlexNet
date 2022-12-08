@@ -4,39 +4,54 @@ import torch
 import torch.nn as nn
 
 
+def conv_layer(in_channels, out_channels, kernel_size, stride, padding, pooling=False):
+    layer = nn.Sequential(
+        nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding),
+        nn.ReLU()
+    )
+
+    if pooling:
+        layer.add_module('pooling', nn.MaxPool2d(kernel_size=3, stride=2))
+    
+    return layer
+
+
+def fc_layer(in_features, out_features, p=0.5):
+    layer = nn.Sequential(
+        nn.Dropout(p=p),
+        nn.Linear(in_features, out_features),
+        nn.ReLU(inplace=True)
+    )
+    
+    return layer
+
+
 class AlexNet(nn.Module):
     def __init__(self, num_class=1000, dropout=0.5):
         super(AlexNet, self).__init__()
-        self.features = nn.Sequential(
-            nn.Conv2d(3, 96, kernel_size=11, stride=4),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(96, 256, kernel_size=5, stride=1, padding=2),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2),
-            nn.Conv2d(256, 384, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 384, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.Conv2d(384, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=3, stride=2)
-        )
+        
+        self.layer1 = conv_layer(3, 96, 11, 4, 0, pooling=True)
+        self.layer2 = conv_layer(96, 256, 5, 1, 2, pooling=True)
+        self.layer3 = conv_layer(256, 384, 3, 1, 1)
+        self.layer4 = conv_layer(384, 384, 3, 1, 1)
+        self.layer5 = conv_layer(384, 256, 3, 1, 1, pooling=True)
 
-        self.classifier = nn.Sequential(
-            nn.Linear(6 * 6 * 256, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout),
-            nn.Linear(4096, 4096),
-            nn.ReLU(inplace=True),
-            nn.Dropout(p=dropout),
-            nn.Linear(4096, num_class)
-        )
+        self.layer6 = fc_layer(6 * 6 * 256, 4096, p=0.5)
+        self.layer7 = fc_layer(4096, 4096, p=0.5)
+        self.layer8 = fc_layer(4096, num_class)
 
     def forward(self, x):
-        x = self.features(x)
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        x = self.layer5(x)
+        # x = x.view(x.size(0), -1)
         x = torch.flatten(x, start_dim=1)
-        x = self.classifier(x)
+        x = self.layer6(x)
+        x = self.layer7(x)
+        x = self.layer8(x)
+
         return x
 
 
