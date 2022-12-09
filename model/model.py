@@ -7,7 +7,7 @@ import torch.nn as nn
 def conv_layer(in_channels, out_channels, kernel_size, stride, padding, pooling=False):
     layer = nn.Sequential(
         nn.Conv2d(in_channels, out_channels, kernel_size, stride, padding),
-        nn.ReLU()
+        nn.ReLU(inplace=True)
     )
 
     if pooling:
@@ -16,9 +16,9 @@ def conv_layer(in_channels, out_channels, kernel_size, stride, padding, pooling=
     return layer
 
 
-def fc_layer(in_features, out_features, p=0.5):
+def fc_layer(in_features, out_features, dropout=0.5):
     layer = nn.Sequential(
-        nn.Dropout(p=p),
+        nn.Dropout(p=dropout),
         nn.Linear(in_features, out_features),
         nn.ReLU(inplace=True)
     )
@@ -36,9 +36,9 @@ class AlexNet(nn.Module):
         self.layer4 = conv_layer(384, 384, 3, 1, 1)
         self.layer5 = conv_layer(384, 256, 3, 1, 1, pooling=True)
 
-        self.layer6 = fc_layer(6 * 6 * 256, 4096, p=0.5)
-        self.layer7 = fc_layer(4096, 4096, p=0.5)
-        self.layer8 = fc_layer(4096, num_class)
+        self.layer6 = fc_layer(6 * 6 * 256, 4096, dropout=dropout)
+        self.layer7 = fc_layer(4096, 4096, dropout=dropout)
+        self.layer8 = fc_layer(4096, num_class, dropout=0)
 
     def forward(self, x):
         x = self.layer1(x)

@@ -5,8 +5,8 @@ import os
 import numpy as np
 import torch.nn as nn
 import torch
-from torch.utils.tensorboard import SummaryWriter
 
+from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
@@ -16,20 +16,19 @@ if __name__ == '__main__':
     warnings.filterwarnings('ignore')
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-drop', '--dropout', type=float, default=0.5, help="Dropout rate.")
-    parser.add_argument('-l2', '--l2_reg', type=float, default=1e-4, help="L2 regularization coefficient.")
     parser.add_argument('-lr', type=float, default=0.0002, help="Initial learning rate.")
     parser.add_argument('-e', '--epochs', type=int, default=10, help="Number of epochs to train.")
-    parser.add_argument('-bs', '--batch_size', type=int, default=64, help="Batch size.")
-    parser.add_argument('-train_fn', type=str, default='./dataset/train/', help='train dataset')
-    parser.add_argument('-valid_fn', type=str, default='./dataset/val/', help='valid dataset')
-    parser.add_argument('-nc', '--num_class', type=int, default=5,  help="number class.")
+    parser.add_argument('-bs', '--batch_size', type=int, default=32, help="Batch size.")
+    parser.add_argument('-train_fn', type=str, default='/Users/zsg/alexnet/pytorch_alexnet/flower_data/train/', help='train dataset')
+    parser.add_argument('-valid_fn', type=str, default='/Users/zsg/alexnet/pytorch_alexnet/flower_data/val/', help='valid dataset')
+    parser.add_argument('-nc', '--num_class', type=int, default=1000,  help="number class.")
     args = parser.parse_args()
 
     writer = SummaryWriter('./log/')
 
     data_transform = {
         'train': transforms.Compose([transforms.RandomResizedCrop(227),
-                                     transforms.RandomHorizontalFlip(p=0.5),
+                                     transforms.RandomHorizontalFlip(),
                                      transforms.ToTensor(),
                                      transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))]),
         'val': transforms.Compose([transforms.Resize((227, 227)),
@@ -45,10 +44,10 @@ if __name__ == '__main__':
 
     network = AlexNet(num_class=args.num_class, dropout=args.dropout)
     loss_fn = nn.CrossEntropyLoss()
-    optimizer = torch.optim.Adam(params=network.parameters(), lr=args.lr)
+    optimizer = torch.optim.Adam(params=network.parameters(), lr=0.0002)
     epochs = args.epochs
     train_step = len(train_loader)
-    val_num = len(val_loader)
+    val_num = len(val_set)
     best_acc = 0.0
     for epoch in range(epochs):
         network.train()
@@ -61,18 +60,22 @@ if __name__ == '__main__':
             optimizer.step()
             writer.add_scalar('loss', loss, step)
             writer.add_images('images', images, step)
+            writer.add_graph(network, images)
             print(f'Epoch: [{epoch + 1} / {epochs}], step: [{step} / {train_step}], loss: [{loss:.4f}]')
             step += 1
 
         network.eval()
         accuracy = 0.0
-        for images, labels in val_loader:
-            y_hat = network(images)
-            prediction = torch.max(y_hat, dim=1)[1]
-            accuracy += (prediction == labels).sum().item()
-        accuracy /= val_num
-        print(f'Epoch: [{epoch + 1} / {epochs}], accuracy: [{accuracy:.4f}]')
-        if accuracy > best_acc:
-            best_acc = accuracy
-            torch.save(network.state_dict(), './output/{}_{}'.format(epoch, accuracy))
+        mean_loss = 0.0
+        with torch.no_grad():
+            for images, labels in val_loader:
+                y_hat = network(images)
+                mean_loss += loss_fn(y_hat, labels)
+                prediction = torch.max(y_hat, dim=1)[1]
+                accuracy += (prediction == labels).sum().item()
+            accuracy /= val_num
+            print(f'Epoch: [{epoch + 1} / {epochs}], loss: [{mean_loss} / {val_num}], accuracy: [{accuracy:.4f}]')
+            if accuracy > best_acc:
+                best_acc = accuracy
+                torch.save(network.state_dict(), './output/{}_{}'.format(epoch, accuracy))
     writer.close()
