@@ -1,10 +1,8 @@
 import argparse
 import warnings
-import os
 
-import numpy as np
-import torch.nn as nn
 import torch
+import torch.nn as nn
 
 from torch.utils.tensorboard import SummaryWriter
 from torchvision import transforms
@@ -28,7 +26,7 @@ if __name__ == '__main__':
     parser.add_argument('--valid_ration', type=float, default=0.1, help="ration of valid set")
     args = parser.parse_args()
 
-    writer = SummaryWriter('./log/')
+    # writer = SummaryWriter('./log/')
 
     data_transform = transforms.Compose(
         [transforms.Resize((227, 227), interpolation=InterpolationMode.BICUBIC), transforms.RandomHorizontalFlip(),
@@ -60,10 +58,11 @@ if __name__ == '__main__':
             loss = loss_fn(y_hat, labels)
             loss.backward()
             optimizer.step()
-            writer.add_scalar('loss', loss, step)
-            writer.add_images('images', images, step)
-            writer.add_graph(network, images)
-            print(f'Epoch: [{epoch + 1} / {args.epochs}], step: [{step} / {train_step}], loss: [{loss:.4f}]')
+            # writer.add_scalar('loss', loss, step)
+            # writer.add_images('images', images, step)
+            # writer.add_graph(network, images)
+            if step % 10 == 0:
+                print(f'Epoch: [{epoch + 1} / {args.epochs}], step: [{step} / {train_step}], loss: [{loss:.4f}]')
             step += 1
 
         network.eval()
@@ -81,5 +80,5 @@ if __name__ == '__main__':
             if accuracy > best_acc:
                 best_acc = accuracy
                 print('Saving model to ./output/')
-                torch.save(network.state_dict(), './output/weights.ckpt')
-    writer.close()
+                torch.save(network.state_dict(), './output/weights_{}_{}.ckpt'.format(loss, accuracy))
+    # writer.close()
