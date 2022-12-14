@@ -25,7 +25,7 @@ if __name__ == '__main__':
     test_loader = DataLoader(dataset, batch_size=64)
     test_num = len(dataset)
 
-    model = AlexNet(num_class=args.num_class)
+    model = AlexNet(num_class=args.num_class).to(device)
     model.load_state_dict(torch.load(args.model_name))
 
     model.eval()
