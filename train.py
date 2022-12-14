@@ -80,5 +80,5 @@ if __name__ == '__main__':
             if accuracy > best_acc:
                 best_acc = accuracy
                 print('Saving model to ./output/')
-                torch.save(network.state_dict(), './output/weights_{}_{}.ckpt'.format(loss, accuracy))
+                torch.save(network.state_dict(), './output/weights_{}_{}.pth'.format(loss, accuracy))
     # writer.close()
