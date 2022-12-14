@@ -24,7 +24,7 @@ if __name__ == '__main__':
     parser.add_argument('-bs', '--batch_size', type=int, default=256, help="Batch size.")
     parser.add_argument('--train_fn', type=str, default='./CIFAR10/', help='train dataset')
     parser.add_argument('--test_fn', type=str, default='./CIFAR10/', help='test dataset')
-    parser.add_argument('-nc', '--num_class', type=int, default=1000, help="number class.")
+    parser.add_argument('-nc', '--num_class', type=int, default=10, help="number class.")
     parser.add_argument('--valid_ration', type=float, default=0.1, help="ration of valid set")
     args = parser.parse_args()
 
