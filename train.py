@@ -76,7 +76,7 @@ if __name__ == '__main__':
                 prediction = torch.max(y_hat, dim=1)[1]
                 accuracy += (prediction == labels).sum().item()
             accuracy /= valid_num
-            print(f'Epoch: [{epoch + 1} / {args.epochs}], loss: [{loss} / {valid_num}:.4f], accuracy: [{accuracy:.4f}]')
+            print(f'Epoch: [{epoch + 1} / {args.epochs}], loss: [{loss / valid_num:.4f}], accuracy: [{accuracy:.4f}]')
             if accuracy > best_acc:
                 best_acc = accuracy
                 print('Saving model to ./output/')
