@@ -100,13 +100,9 @@ class GoogLeNet(nn.Module):
 
     def forward(self, x):
         x = self.layer1(x)
-        print(x.shape)
         x = self.layer2(x)
-        print(x.shape)
         x = self.layer3(x)
-        print(x.shape)
         x = self.layer4(x)
-        print(x.shape)
         x = self.layer5(x)
         x = self.layer6(x)
 
