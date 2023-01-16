@@ -1,5 +1,6 @@
 import argparse
 import warnings
+import os
 
 import torch
 import torch.nn as nn
@@ -9,7 +10,7 @@ from torchvision import transforms
 from torchvision import datasets
 from torch.utils.data import DataLoader
 from torchvision.transforms.functional import InterpolationMode
-from model.model import AlexNet
+from model.AlexNet import AlexNet
 
 if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -19,12 +20,15 @@ if __name__ == '__main__':
     parser.add_argument('--dropout', type=float, default=0.5, help="Dropout rate.")
     parser.add_argument('--lr', type=float, default=0.01, help="Initial learning rate.")
     parser.add_argument('--epochs', type=int, default=20, help="Number of epochs to train.")
-    parser.add_argument('--batch_size', type=int, default=256, help="Batch size.")
+    parser.add_argument('--batch_size', type=int, default=32, help="Batch size.")
     parser.add_argument('--train_fn', type=str, default='./CIFAR10/', help='train dataset')
     parser.add_argument('--test_fn', type=str, default='./CIFAR10/', help='test dataset')
     parser.add_argument('--num_class', type=int, default=10, help="number class.")
     parser.add_argument('--valid_ration', type=float, default=0.1, help="ration of valid set")
     args = parser.parse_args()
+
+    if not os.path.exists('./output'):
+        os.mkdir('./output')
 
     # writer = SummaryWriter('./log/')
 
